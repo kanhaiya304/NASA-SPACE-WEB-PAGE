@@ -4,19 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orrery Web App - NASA Space Apps Challenge</title>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        body {
-    font-family: Arial, sans-serif;
-    background-color: #000;
-    color: #fff;
-    margin: 0;
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orrery Web App - NASA Space Apps Challenge</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -169,30 +156,6 @@
                 });
             })
             .catch(error => console.log(error));
-    </script>
-</body>
-</html>const mars = createCelestialObject(0.3, 0xff0000, { x: 8, y: 0, z: 0 });
-// Add other planets similarly
-
-camera.position.z = 10;
-
-// Render the scene
-function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-}
-animate();
-
-fetch('https://api.nasa.gov/neo/rest/v1/feed?start_date=2024-09-07&end_date=2024-09-14&api_key=YOUR_API_KEY')
-    .then(response => response.json())
-    .then(data => {
-        const neos = data.near_earth_objects;
-        neos.forEach(neo => {
-            console.log(neo.name);
-            // Use the NEO data to add objects to the Orrery
-        });
-    })
-    .catch(error => console.log(error));
     </script>
 </body>
 </html>
