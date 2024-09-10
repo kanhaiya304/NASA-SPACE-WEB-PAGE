@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orrery Web App - NASA Space Apps Challenge</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+header {
+    background-color: #333;
+    padding: 1em;
+}
+
+nav a {
+    color: #fff;
+    margin: 0 1em;
+    text-decoration: none;
+}
+
+#app {
+    padding: 2em;
+}
+
+#orrery-container {
+    width: 100%;
+    height: 500px;
+    background-color: #111;
+    border: 2px solid #fff;
+    margin-bottom: 1em;
+}
+
+#info-panel {
+    background-color: #222;
+    padding: 1em;
+    border: 1px solid #fff;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+footer {
+    background-color: #333;
+    padding: 1em;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Orrery Web App</h1>
+        <nav>
+            <a href="#app">Orrery</a>
+            <a href="#about">About</a>
+        </nav>
+    </header>
+
+    <section id="app">
+        <h2>Interactive Orrery</h2>
+        <div id="orrery-container"></div>
+        <div id="info-panel">
+            <h3>Object Information</h3>
+            <p>Select an object in the Orrery for details.</p>
+        </div>
+    </section>
+
+    <section id="about">
+        <h2>About the Orrery</h2>
+        <p>This interactive Orrery displays planets, Near-Earth Asteroids, comets, and other celestial bodies.</p>
+    </section>
+
+    <footer>
+        <p>2024 NASA Space Apps Challenge</p>
+    </footer>
+
+    <script>
+        // app.js
+
+// Initialize the Three.js scene
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer();
+
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.getElementById('orrery-container').appendChild(renderer.domElement);
+
+// Create a basic sphere for planets and NEOs
+function createCelestialObject(size, color, position) {
+    const geometry = new THREE.SphereGeometry(size, 32, 32);
+    const material = new THREE.MeshBasicMaterial({ color: color });
+    const sphere = new THREE.Mesh(geometry, material);
+    sphere.position.set(position.x, position.y, position.z);
+    scene.add(sphere);
+    return sphere;
+}
+
+// Create planets
+const earth = createCelestialObject(0.5, 0x0000ff, { x: 5, y: 0, z: 0 });
+const mars = createCelestialObject(0.3, 0xff0000, { x: 8, y: 0, z: 0 });
+// Add other planets similarly
+
+camera.position.z = 10;
+
+// Render the scene
+function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+}
+animate();
+
+fetch('https://api.nasa.gov/neo/rest/v1/feed?start_date=2024-09-07&end_date=2024-09-14&api_key=YOUR_API_KEY')
+    .then(response => response.json())
+    .then(data => {
+        const neos = data.near_earth_objects;
+        neos.forEach(neo => {
+            console.log(neo.name);
+            // Use the NEO data to add objects to the Orrery
+        });
+    })
+    .catch(error => console.log(error));
+    </script>
+</body>
+</html>
