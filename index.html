@@ -11,48 +11,60 @@
     background-color: #000;
     color: #fff;
     margin: 0;
-    padding: 0;
-    text-align: center;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orrery Web App - NASA Space Apps Challenge</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
 
-header {
-    background-color: #333;
-    padding: 1em;
-}
+        header {
+            background-color: #333;
+            padding: 1em;
+        }
 
-nav a {
-    color: #fff;
-    margin: 0 1em;
-    text-decoration: none;
-}
+        nav a {
+            color: #fff;
+            margin: 0 1em;
+            text-decoration: none;
+        }
 
-#app {
-    padding: 2em;
-}
+        #app {
+            padding: 2em;
+        }
 
-#orrery-container {
-    width: 100%;
-    height: 500px;
-    background-color: #111;
-    border: 2px solid #fff;
-    margin-bottom: 1em;
-}
+        #orrery-container {
+            width: 100%;
+            height: 500px;
+            background-color: #111;
+            border: 2px solid #fff;
+            margin-bottom: 1em;
+        }
 
-#info-panel {
-    background-color: #222;
-    padding: 1em;
-    border: 1px solid #fff;
-    max-width: 500px;
-    margin: 0 auto;
-}
+        #info-panel {
+            background-color: #222;
+            padding: 1em;
+            border: 1px solid #fff;
+            max-width: 500px;
+            margin: 0 auto;
+        }
 
-footer {
-    background-color: #333;
-    padding: 1em;
-    position: fixed;
-    width: 100%;
-    bottom: 0;
-}
+        footer {
+            background-color: #333;
+            padding: 1em;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
     </style>
 </head>
 <body>
@@ -82,30 +94,84 @@ footer {
         <p>2024 NASA Space Apps Challenge</p>
     </footer>
 
+    <!-- Include Three.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
     <script>
-        // app.js
+        // Initialize the Three.js scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('orrery-container').appendChild(renderer.domElement);
 
-// Initialize the Three.js scene
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer();
+        // Create light for the scene
+        const light = new THREE.PointLight(0xffffff, 1.5);
+        light.position.set(0, 0, 0); // Sunlight at the center
+        scene.add(light);
 
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.getElementById('orrery-container').appendChild(renderer.domElement);
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
 
-// Create a basic sphere for planets and NEOs
-function createCelestialObject(size, color, position) {
-    const geometry = new THREE.SphereGeometry(size, 32, 32);
-    const material = new THREE.MeshBasicMaterial({ color: color });
-    const sphere = new THREE.Mesh(geometry, material);
-    sphere.position.set(position.x, position.y, position.z);
-    scene.add(sphere);
-    return sphere;
-}
+        // Create a basic sphere for planets and NEOs
+        function createCelestialObject(size, color, position) {
+            const geometry = new THREE.SphereGeometry(size, 32, 32);
+            const material = new THREE.MeshBasicMaterial({ color: color });
+            const sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(position.x, position.y, position.z);
+            scene.add(sphere);
+            return sphere;
+        }
 
-// Create planets
-const earth = createCelestialObject(0.5, 0x0000ff, { x: 5, y: 0, z: 0 });
-const mars = createCelestialObject(0.3, 0xff0000, { x: 8, y: 0, z: 0 });
+        // Create planets
+        const earth = createCelestialObject(0.5, 0x0000ff, { x: 5, y: 0, z: 0 });
+        const mars = createCelestialObject(0.3, 0xff0000, { x: 8, y: 0, z: 0 });
+
+        // Animation data
+        const planetData = [
+            { name: "Earth", object: earth, distance: 5, speed: 0.01 },
+            { name: "Mars", object: mars, distance: 8, speed: 0.008 }
+        ];
+
+        camera.position.z = 15;
+
+        // Render the scene with animated orbiting planets
+        function animate() {
+            requestAnimationFrame(animate);
+
+            planetData.forEach(planet => {
+                planet.object.position.x = Math.cos(Date.now() * planet.speed) * planet.distance;
+                planet.object.position.z = Math.sin(Date.now() * planet.speed) * planet.distance;
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Fetch data from NASA's NEO API and display in the Orrery
+        fetch('https://api.nasa.gov/neo/rest/v1/feed?start_date=2024-09-07&end_date=2024-09-14&api_key=DEMO_KEY')
+            .then(response => response.json())
+            .then(data => {
+                const neos = data.near_earth_objects;
+
+                Object.keys(neos).forEach(date => {
+                    neos[date].forEach(neo => {
+                        const distance = neo.close_approach_data[0].miss_distance.lunar / 10;  // Scaled down
+                        const neoObject = createCelestialObject(0.2, 0xffff00, { x: distance, y: 0, z: 0 });
+                        
+                        planetData.push({
+                            name: neo.name,
+                            object: neoObject,
+                            distance: distance,
+                            speed: Math.random() * 0.005 + 0.002 // Random speed for asteroids
+                        });
+                    });
+                });
+            })
+            .catch(error => console.log(error));
+    </script>
+</body>
+</html>const mars = createCelestialObject(0.3, 0xff0000, { x: 8, y: 0, z: 0 });
 // Add other planets similarly
 
 camera.position.z = 10;
